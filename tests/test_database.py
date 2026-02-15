@@ -2,7 +2,7 @@
 
 import asyncio
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -28,7 +28,7 @@ def _make_result(
 ):
     return {
         "round_id": round_id,
-        "timestamp": timestamp or datetime.utcnow().isoformat(),
+        "timestamp": timestamp or datetime.now(timezone.utc).isoformat(),
         "result": result,
         "player_score": player_score,
         "banker_score": banker_score,
@@ -252,7 +252,7 @@ class TestGetStatistics:
         assert stats["period_hours"] == 24
 
     def test_statistics_counts_winners(self, db):
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         for i, r in enumerate(["P", "P", "B", "B", "B", "T"]):
             asyncio.get_event_loop().run_until_complete(
                 db.insert_result(_make_result(round_id=f"stat_{i}", result=r, timestamp=now))
@@ -264,7 +264,7 @@ class TestGetStatistics:
         assert stats["total_rounds"] == 6
 
     def test_statistics_percentages(self, db):
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         # 2P, 2B → 50% each
         for i, r in enumerate(["P", "P", "B", "B"]):
             asyncio.get_event_loop().run_until_complete(
@@ -276,7 +276,7 @@ class TestGetStatistics:
         assert stats["tie_percentage"] == 0.0
 
     def test_statistics_avg_scores(self, db):
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         asyncio.get_event_loop().run_until_complete(
             db.insert_result(
                 _make_result(
@@ -298,8 +298,8 @@ class TestGetStatistics:
         assert stats["avg_banker_score"] == 6.0
 
     def test_statistics_respects_hours_parameter(self, db):
-        old_ts = (datetime.utcnow() - timedelta(hours=48)).isoformat()
-        new_ts = datetime.utcnow().isoformat()
+        old_ts = (datetime.now(timezone.utc) - timedelta(hours=48)).isoformat()
+        new_ts = datetime.now(timezone.utc).isoformat()
         asyncio.get_event_loop().run_until_complete(
             db.insert_result(_make_result(round_id="old", result="P", timestamp=old_ts))
         )

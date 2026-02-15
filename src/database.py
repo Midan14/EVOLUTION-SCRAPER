@@ -5,7 +5,7 @@ Stores results in SQLite for persistence and analysis
 import asyncio
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -124,7 +124,7 @@ class Database:
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 result.get('round_id'),
-                result.get('timestamp', datetime.utcnow().isoformat()),
+                result.get('timestamp', datetime.now(timezone.utc).isoformat()),
                 result.get('result'),
                 result.get('player_score'),
                 result.get('banker_score'),
@@ -251,7 +251,7 @@ async def test_database():
     # Insert test result
     test_result = {
         'round_id': f'test_{datetime.now().timestamp()}',
-        'timestamp': datetime.utcnow().isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat(),
         'result': 'B',
         'player_score': 5,
         'banker_score': 7,

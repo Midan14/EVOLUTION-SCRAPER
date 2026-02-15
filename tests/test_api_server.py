@@ -1,6 +1,6 @@
 import asyncio
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -51,7 +51,7 @@ def _make_sample_now(
         round_id=round_id, result=result,
         player_score=player_score, banker_score=banker_score,
     )
-    s["timestamp"] = datetime.utcnow().isoformat()
+    s["timestamp"] = datetime.now(timezone.utc).isoformat()
     return s
 
 
