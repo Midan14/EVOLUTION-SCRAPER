@@ -9,10 +9,11 @@ Agente avanzado que analiza todo el comportamiento de la mesa:
 """
 
 import logging
-from collections import deque, defaultdict, Counter
-from typing import List, Dict, Tuple, Optional
-import numpy as np
+from collections import Counter, defaultdict, deque
 from datetime import datetime
+from typing import Dict, List
+
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -386,7 +387,6 @@ class AdvancedTableAnalyzer:
         # Decidir estrategia basada en comportamiento
         momentum = behavior['momentum']
         clustering = behavior['clustering']
-        transitions = behavior['transition_zones']
         dominance = behavior['dominance_shifts']
 
         recommendation = None

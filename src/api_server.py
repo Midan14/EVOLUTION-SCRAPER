@@ -8,7 +8,7 @@ Your main bot can consume this API to get real-time data
 import os
 import sys
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
@@ -116,7 +116,7 @@ async def health_check():
     return {
         "status": "ok",
         "database": "connected" if db._connection else "disconnected",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "rounds_captured": getattr(db, "rounds_captured", 0),
         "last_frame_at": getattr(db, "last_frame_at", None),
     }

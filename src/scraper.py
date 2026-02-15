@@ -17,7 +17,7 @@ import struct
 import sys
 import traceback
 import zlib
-from datetime import datetime
+from datetime import datetime, timezone
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional
@@ -207,7 +207,7 @@ class EvolutionScraper:
         await self._setup_interceptors()
 
         self.running = True
-        self.last_session_refresh_at = datetime.utcnow()
+        self.last_session_refresh_at = datetime.now(timezone.utc)
         logger.info("✅ Browser launched successfully")
 
     async def _ensure_page_available(self):
@@ -278,7 +278,7 @@ class EvolutionScraper:
     async def _on_ws_message(self, url: str, payload: dict):
         """Process WebSocket message"""
         try:
-            self.last_frame_at = datetime.utcnow()
+            self.last_frame_at = datetime.now(timezone.utc)
             db.last_frame_at = self.last_frame_at.isoformat()
             # Robust handling for different payload types (str, bytes, dict, other)
             try:
@@ -486,7 +486,7 @@ class EvolutionScraper:
 
         return {
             'round_id': round_id,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'result': winner,
             'player_score': player_score,
             'banker_score': banker_score,
@@ -647,7 +647,7 @@ class EvolutionScraper:
     async def inspect_game_render_state(self) -> Dict[str, Any]:
         """Inspect render/video/webgl state in page and game frame."""
         diag: Dict[str, Any] = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "page_url": self.page.url if self.page else None,
             "visibility_state": None,
             "viewport": {},
@@ -884,7 +884,7 @@ class EvolutionScraper:
         """Persist screenshot, HTML and diagnostics for black screen analysis."""
         if not self.page:
             return
-        ts = datetime.utcnow().strftime("%Y%m%dT%H%M%S")
+        ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
         log_dir = Path(config.LOG_FILE).parent
         screenshot_path = log_dir / f"blackscreen_{ts}.png"
         html_path = log_dir / f"blackscreen_{ts}.html"
@@ -1133,7 +1133,7 @@ class EvolutionScraper:
                 logger.warning("⚠️ No game elements found - game may not have loaded properly")
                 # Save debug screenshot and page HTML to help diagnose black screen
                 try:
-                    ts = datetime.utcnow().strftime("%Y%m%dT%H%M%S")
+                    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
                     log_dir = Path(config.LOG_FILE).parent
                     screenshot_path = log_dir / f"debug_screenshot_{ts}.png"
                     html_path = log_dir / f"debug_page_{ts}.html"
@@ -1233,7 +1233,7 @@ class EvolutionScraper:
         """Check if we haven't received WS frames in over 3 minutes (increased from 2)"""
         if not self.last_frame_at:
             return False
-        delta = datetime.utcnow() - self.last_frame_at
+        delta = datetime.now(timezone.utc) - self.last_frame_at
         # Increased from 120s to 180s to reduce unnecessary reconnections
         stale = delta.total_seconds() > 180
         if stale:
@@ -1243,7 +1243,7 @@ class EvolutionScraper:
     def _should_refresh_session(self) -> bool:
         if not self.last_session_refresh_at:
             return True
-        delta = datetime.utcnow() - self.last_session_refresh_at
+        delta = datetime.now(timezone.utc) - self.last_session_refresh_at
         return delta.total_seconds() >= config.SESSION_REFRESH_MINUTES * 60
 
     async def _refresh_session(self):
@@ -1251,7 +1251,7 @@ class EvolutionScraper:
             await self._ensure_page_available()
             await self.page.reload(wait_until='domcontentloaded')
             await asyncio.sleep(3)
-            self.last_session_refresh_at = datetime.utcnow()
+            self.last_session_refresh_at = datetime.now(timezone.utc)
             logger.info("✅ Session refreshed")
         except Exception as e:
             logger.warning(f"Session refresh failed: {e}")
@@ -1274,7 +1274,7 @@ class EvolutionScraper:
                 await self.navigate_to_game()
                 # Give the page a moment to establish WS connections
                 await asyncio.sleep(5)
-                self.last_frame_at = datetime.utcnow()  # Reset stale timer after navigation
+                self.last_frame_at = datetime.now(timezone.utc)  # Reset stale timer after navigation
                 if self.websocket_connections:
                     ws_count = len(self.websocket_connections)
                     logger.info(
