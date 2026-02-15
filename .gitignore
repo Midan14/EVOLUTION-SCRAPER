@@ -1,0 +1,73 @@
+# Environment variables (secrets)
+.env
+storage_state.json
+storage_state.ready
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# mypy / type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+
+# pytest
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Logs
+logs/*.log
+logs/*.log.*
+logs/*.html
+logs/*.json
+
+# Bot log
+bot.log
+
+# Database
+data/*.db
+data/*.db-journal
+data/*.db-wal
+
+# Browser data (session cache, cookies, IndexedDB)
+browser_data/
+
+# Captured data (may contain sensitive info)
+captured_responses.json
+captured_formatted.json
+websocket_messages.json
+
+# Screenshots / debug images
+*.png
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backtest output
+backtest_metrics.json
+
+# SSH / server access notes
+emergency_ssh_access.txt

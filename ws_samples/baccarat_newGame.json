@@ -1,0 +1,13 @@
+{
+  "id": "1771030462654-4749",
+  "type": "baccarat.newGame",
+  "args": {
+    "gameId": "1893f6d289ae97c9415732d0",
+    "gameNumber": "00:54:22",
+    "shoeCardsOut": 104,
+    "version": 2063755024,
+    "isNewBettingProtocol": false,
+    "tableId": "XXXtremeLB000001"
+  },
+  "time": 1771030462654
+}

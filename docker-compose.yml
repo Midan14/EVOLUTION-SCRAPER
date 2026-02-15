@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  scraper:
+    build: .
+    env_file:
+      - .env
+    environment:
+      - HEADLESS=true
+      - DATABASE_PATH=data/results.db
+      - LOG_FILE=logs/scraper.log
+      - API_ENABLED=true
+      - API_HOST=0.0.0.0
+      - API_PORT=8899
+    ports:
+      - "8899:8899"
+    volumes:
+      - scraper_data:/app/data
+      - scraper_logs:/app/logs
+      - browser_data:/app/browser_data
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python3",
+          "-c",
+          "import httpx; r = httpx.get('http://localhost:8899/health'); r.raise_for_status()",
+        ]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Optional: PostgreSQL for dragon_bot_advanced.py / dragon_bot_ml.py
+  # Uncomment if you need PostgreSQL instead of SQLite
+  #
+  # postgres:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_DB: ${POSTGRES_DB:-dragon_bot}
+  #     POSTGRES_USER: ${POSTGRES_USER:-bot_user}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: always
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bot_user}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+volumes:
+  scraper_data:
+  scraper_logs:
+  browser_data:
+  # postgres_data:

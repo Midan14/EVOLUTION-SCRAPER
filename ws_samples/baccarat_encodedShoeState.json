@@ -1,0 +1,116 @@
+{
+  "id": "1771030447391-230",
+  "type": "baccarat.encodedShoeState",
+  "args": {
+    "stats": {
+      "gameCount": 17,
+      "playerWins": 8,
+      "bankerWins": 9,
+      "ties": 0,
+      "playerPairs": 0,
+      "bankerPairs": 2
+    },
+    "history_v2": [
+      {
+        "winner": "Player",
+        "natural": true,
+        "playerScore": 9,
+        "bankerScore": 1
+      },
+      {
+        "winner": "Player",
+        "playerScore": 4,
+        "bankerScore": 3,
+        "multiplier": 4.0
+      },
+      {
+        "winner": "Player",
+        "playerScore": 7,
+        "bankerScore": 2
+      },
+      {
+        "winner": "Banker",
+        "natural": true,
+        "bankerPair": true,
+        "playerScore": 3,
+        "bankerScore": 8
+      },
+      {
+        "winner": "Player",
+        "playerScore": 6,
+        "bankerScore": 4
+      },
+      {
+        "winner": "Banker",
+        "natural": true,
+        "playerScore": 4,
+        "bankerScore": 9,
+        "multiplier": 3.0
+      },
+      {
+        "winner": "Banker",
+        "bankerPair": true,
+        "playerScore": 0,
+        "bankerScore": 6
+      },
+      {
+        "winner": "Player",
+        "playerScore": 8,
+        "bankerScore": 1
+      },
+      {
+        "winner": "Banker",
+        "playerScore": 1,
+        "bankerScore": 3,
+        "multiplier": 4.0
+      },
+      {
+        "winner": "Player",
+        "playerScore": 4,
+        "bankerScore": 0
+      },
+      {
+        "winner": "Banker",
+        "playerScore": 0,
+        "bankerScore": 6
+      },
+      {
+        "winner": "Banker",
+        "playerScore": 2,
+        "bankerScore": 7
+      },
+      {
+        "winner": "Banker",
+        "natural": true,
+        "playerScore": 0,
+        "bankerScore": 8
+      },
+      {
+        "winner": "Banker",
+        "playerScore": 1,
+        "bankerScore": 6,
+        "multiplier": 8.0
+      },
+      {
+        "winner": "Player",
+        "natural": true,
+        "playerScore": 9,
+        "bankerScore": 8
+      },
+      {
+        "winner": "Player",
+        "playerScore": 8,
+        "bankerScore": 5
+      },
+      {
+        "winner": "Banker",
+        "natural": true,
+        "playerScore": 0,
+        "bankerScore": 8,
+        "multiplier": 5.0
+      }
+    ],
+    "tableId": "XXXtremeLB000001"
+  },
+  "time": 1771030447391
+}

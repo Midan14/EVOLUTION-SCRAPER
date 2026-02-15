@@ -1,0 +1,102 @@
+{
+  "id": "1771030447391-4960",
+  "type": "baccarat.tableState",
+  "args": {
+    "tableId": "XXXtremeLB000001",
+    "tableName": "XXXtreme Lightning Baccarat",
+    "currentGame": {
+      "gameId": "1893f6c85c2f25513736ba30",
+      "gameNumber": "00:53:38",
+      "betting": "BetsClosed",
+      "dealing": "Dealing",
+      "isBurning": false,
+      "gameData": {
+        "playerHand": {
+          "cards": [
+            "6D"
+          ],
+          "score": 6
+        },
+        "bankerHand": {
+          "cards": [
+            "4D"
+          ],
+          "score": 4
+        },
+        "lightningMultipliers": [
+          {
+            "card": "JC",
+            "value": 8
+          },
+          {
+            "card": "5D",
+            "value": 2
+          },
+          {
+            "card": "6D",
+            "value": 10
+          },
+          {
+            "card": "AD",
+            "value": 3
+          },
+          {
+            "card": "6S",
+            "value": 4
+          },
+          {
+            "card": "QC",
+            "value": 3
+          },
+          {
+            "card": "TS",
+            "value": 2
+          }
+        ],
+        "multipliers": [
+          {
+            "card": "JC",
+            "value": 8
+          },
+          {
+            "card": "5D",
+            "value": 2
+          },
+          {
+            "card": "6D",
+            "value": 10
+          },
+          {
+            "card": "AD",
+            "value": 3
+          },
+          {
+            "card": "6S",
+            "value": 4
+          },
+          {
+            "card": "QC",
+            "value": 3
+          },
+          {
+            "card": "TS",
+            "value": 2
+          }
+        ],
+        "redEnvelopePayouts": {},
+        "redEnvelopePayouts_v2": {}
+      },
+      "cuttingCard": false,
+      "version": 2063754999
+    },
+    "previousGameNumber": "00:53:03",
+    "dealer": {
+      "screenName": "Stepha"
+    },
+    "active": true,
+    "shoeCardsOut": 98,
+    "version": 2063754999,
+    "isNewBettingProtocol": false
+  },
+  "time": 1771030447391
+}

@@ -1,0 +1,27 @@
+# Evolution Gaming Baccarat Scraper - Dependencies
+
+# Browser Automation
+playwright==1.48.0
+
+# Async HTTP
+aiohttp>=3.9.0
+httpx>=0.25.0
+
+# Database
+aiosqlite>=0.19.0
+asyncpg>=0.29.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# API server
+fastapi>=0.108.0
+uvicorn>=0.25.0
+
+# Telegram notifications
+python-telegram-bot>=21.0
+
+# Machine Learning / Data Analysis
+pandas>=2.1.0
+numpy>=1.26.0
+scikit-learn>=1.4.0

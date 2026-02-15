@@ -1,0 +1,23 @@
+[Unit]
+Description=Dragon Bot ML
+After=network.target postgresql.service fastestvpn.service
+Wants=fastestvpn.service
+
+[Service]
+User=root
+WorkingDirectory=/root/EVOLUTION-SCRAPER
+Environment="PLAYWRIGHT_BROWSERS_PATH=/root/.cache/ms-playwright"
+Environment="HEADLESS=1"
+EnvironmentFile=-/root/EVOLUTION-SCRAPER/.env
+Environment="HEADLESS=1"
+Environment="DB_URL=postgresql://root:DragonBotRoot2026!@localhost/dragon_bot"
+Environment="TARGET_URL=https://dragonslots-1.com/es/live-casino/game/evolution/xxxtremelightningbaccarat"
+Environment="BROWSER_DATA_DIR=/root/EVOLUTION-SCRAPER/browser_data"
+Environment="STORAGE_STATE_PATH=/root/EVOLUTION-SCRAPER/storage_state.json"
+ExecStartPre=/bin/sleep 20
+ExecStart=/bin/sh -c 'export HEADLESS=1; exec /root/EVOLUTION-SCRAPER/venv/bin/python /root/EVOLUTION-SCRAPER/dragon_bot_ml.py'
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
