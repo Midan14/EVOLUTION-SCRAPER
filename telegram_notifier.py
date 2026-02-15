@@ -463,3 +463,125 @@ ESTRATEGIAS ACTIVAS:
             import traceback
             logger.error(traceback.format_exc())
             return False
+
+    async def send_lightning_prediction(
+        self,
+        prediction: str,
+        confidence: float,
+        ev_data: dict,
+        lightning_stats: dict,
+        strategies_detail: str,
+        road_display: str,
+        game_stats: dict
+    ):
+        """
+        Enviar predicción Lightning Baccarat con EV y multiplicadores
+        
+        Args:
+            prediction: "Player" o "Banker"
+            confidence: Confianza de la predicción (0-100)
+            ev_data: Dict con signal, ev, kelly_bet, recommended_amount del BankrollManager
+            lightning_stats: Dict con avg_multiplier, distribution del LightningTracker
+            strategies_detail: Detalle de estrategias activas
+            road_display: Visualización de Big Road
+            game_stats: Estadísticas del juego (recent_stats, total_stats, game info)
+        """
+        try:
+            # Extract data
+            signal = ev_data.get('signal', 'SALTAR')
+            ev = ev_data.get('ev', 0)
+            kelly_pct = ev_data.get('kelly_bet', 0) * 100  # Convert to percentage
+            recommended_amount = ev_data.get('recommended_amount', 0)
+            
+            avg_mult = lightning_stats.get('avg_multiplier', 1.0)
+            distribution = lightning_stats.get('distribution', {})
+            hot_streak = lightning_stats.get('hot_streak', False)
+            
+            # Format distribution
+            dist_parts = []
+            for mult in [2, 3, 5, 8]:
+                pct = distribution.get(mult, 0) * 100
+                dist_parts.append(f"{mult}x({pct:.0f}%)")
+            dist_str = " ".join(dist_parts) if dist_parts else "Sin datos"
+            
+            # Game stats
+            recent_stats = game_stats.get('recent_stats', {})
+            p_count = recent_stats.get('player', 0)
+            b_count = recent_stats.get('banker', 0)
+            t_count = recent_stats.get('tie', 0)
+            
+            total_stats = game_stats.get('total_stats', {})
+            total_correct = total_stats.get('correct', 0)
+            total_predictions = total_stats.get('total', 0)
+            accuracy = (total_correct / total_predictions * 100) if total_predictions > 0 else 0
+            
+            table_name = game_stats.get('table_name', 'Lightning Baccarat')
+            game_id = game_stats.get('game_id', 'N/A')
+            
+            # Prediction emoji
+            if prediction == "Banker":
+                emoji = "🔴"
+            elif prediction == "Player":
+                emoji = "🔵"
+            else:
+                emoji = "🟢"
+            
+            # Confidence bar
+            bars = int(confidence / 10)
+            conf_bar = "🟩" * bars + "⬜" * (10 - bars)
+            
+            # Signal emoji
+            signal_emoji = "✅" if signal == "APOSTAR" else "⛔"
+            
+            # Hot table indicator
+            hot_indicator = "🔥 MESA CALIENTE" if hot_streak else ""
+            
+            # Consensus level
+            conf_level = "⭐ EXCELENTE" if confidence >= 70 else "✅ BUENA" if confidence >= 60 else "⚠️ MODERADA"
+            
+            # Safe HTML
+            safe_prediction = html.escape(str(prediction).upper())
+            safe_game_id = html.escape(str(game_id))
+            
+            message = f"""🎯🧠 <b>PREDICCIÓN LIGHTNING BACCARAT</b>
+
+📊 <b>MESA:</b> {table_name}
+🔵P:{p_count} 🔴B:{b_count} 🟢T:{t_count}
+
+━━━━━━━━━━━━━━━━━━━━
+{emoji} → <b>{safe_prediction}</b> ← {emoji}
+━━━━━━━━━━━━━━━━━━━━
+
+💪 Confianza: <b>{confidence:.0f}%</b> ({conf_level})
+{conf_bar}
+
+⚡ <b>LIGHTNING INFO:</b> {hot_indicator}
+🎰 Multiplicador Promedio: <b>{avg_mult:.2f}x</b>
+📊 Distribución: {dist_str}
+
+💰 <b>SEÑAL:</b> {signal_emoji} <b>{signal}</b>
+📈 EV: <b>{ev:+.3f}</b> por unidad
+💵 Apuesta Recomendada: <b>{kelly_pct:.1f}%</b> del bankroll
+💸 Monto: <b>${recommended_amount:.2f}</b>
+
+📋 Consenso: {strategies_detail}
+🛣️ BIG ROAD: 
+{road_display}
+
+<b>ESTRATEGIAS ACTIVAS:</b>
+{strategies_detail}
+
+━━━━━━━━━━━━━━━━━━━━
+🆔 Mano: <code>{safe_game_id}</code>
+📊 Precisión Global: <b>{accuracy:.1f}%</b> ({total_correct}/{total_predictions})"""
+
+            result = await self.send_message(message)
+            if result:
+                logger.info("✅ Predicción Lightning enviada a Telegram")
+            return result
+        except Exception as e:
+            logger.error(f"❌ Error en send_lightning_prediction: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return False
+
