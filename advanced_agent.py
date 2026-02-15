@@ -419,7 +419,10 @@ class AdvancedTableAnalyzer:
             # Hay cambio de dominancia, apostar al nuevo dominante
             recommendation = dominance['current_dominant']
             confidence = 50
-            reasoning.append(f"Shift from {dominance['previous_dominant']} to {dominance['current_dominant']}")
+            reasoning.append(
+                f"Shift from {dominance['previous_dominant']} "
+                f"to {dominance['current_dominant']}"
+            )
 
         # Considerar anomalías
         if behavior['anomalies']:
@@ -499,7 +502,10 @@ class AdvancedTableAnalyzer:
         Basado en historial.
         """
         # Analizar predicciones pasadas en esta fase
-        phase_predictions = [r for r in self.full_history if r.get('phase') == phase and r.get('predicted')]
+        phase_predictions = [
+            r for r in self.full_history
+            if r.get('phase') == phase and r.get('predicted')
+        ]
 
         if len(phase_predictions) < 5:
             return []
@@ -544,19 +550,28 @@ class AdvancedTableAnalyzer:
         if not analysis:
             return "⏳ Esperando más datos para análisis..."
 
+        momentum_dir = analysis['momentum']['direction'].upper()
+        momentum_str = analysis['momentum']['strength']
+        has_cycle = analysis['cyclicity']['has_cycle']
+        cycle_status = '✅ Detectado' if has_cycle else '❌ No detectados'
+
         lines = [
             "👁️ <b>ANÁLISIS PROFUNDO DE MESA</b>",
             "",
-            f"🌊 <b>Momento:</b> {analysis['momentum']['direction'].upper()} (Fuerza: {analysis['momentum']['strength']:.2f})",
-            f"🔄 <b>Ciclos:</b> {'✅ Detectado' if analysis['cyclicity']['has_cycle'] else '❌ No detectados'}"
+            f"🌊 <b>Momento:</b> {momentum_dir} (Fuerza: {momentum_str:.2f})",
+            f"🔄 <b>Ciclos:</b> {cycle_status}"
         ]
 
         if analysis['cyclicity']['has_cycle']:
             lines.append(f"   • Patrón: {analysis['cyclicity']['best_cycle']}")
-            lines.append(f"   • Próximo: {analysis['cyclicity']['next_prediction']} ({analysis['cyclicity']['confidence']:.0%})")
+            next_pred = analysis['cyclicity']['next_prediction']
+            cycle_conf = analysis['cyclicity']['confidence']
+            lines.append(f"   • Próximo: {next_pred} ({cycle_conf:.0%})")
 
-        lines.append(f"📊 <b>Clustering:</b> {analysis['clustering']['type'].upper()}")
-        lines.append(f"🔄 <b>Dominancia:</b> {analysis['dominance_shifts']['current_dominant'].upper()}")
+        cluster_type = analysis['clustering']['type'].upper()
+        current_dom = analysis['dominance_shifts']['current_dominant'].upper()
+        lines.append(f"📊 <b>Clustering:</b> {cluster_type}")
+        lines.append(f"🔄 <b>Dominancia:</b> {current_dom}")
         lines.append(f"⚡ <b>Transiciones:</b> {len(analysis['transition_zones'])} detectadas")
 
         if analysis['anomalies']:
