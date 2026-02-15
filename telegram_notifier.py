@@ -295,7 +295,19 @@ Salió: {actual_emoji} <b>{safe_actual}</b>
         return False
 
     async def send_lightning_prediction(self, data):
-        """Enviar predicción Lightning Baccarat con EV, señal, multiplicadores y Kelly"""
+        """
+        Enviar predicción Lightning Baccarat con EV, señal, multiplicadores y Kelly
+
+        Args:
+            data: Dictionary containing:
+                - predicted (str): Predicted outcome ('Player', 'Banker', 'Tie')
+                - confidence (float): Confidence percentage (0-100)
+                - game_id (str): Game identifier
+                - lightning_data (dict): {'avg_multiplier', 'distribution', 'hot_table'}
+                - signal_data (dict): {'signal', 'ev_formatted', 'kelly_pct', 'recommended_amount', 'reason'}
+                - session_stats (dict): {'bankroll', 'session_pnl', 'wins', 'losses'}
+                - recent_stats (dict): {'player', 'banker', 'tie'}
+        """
         try:
             predicted = data.get("predicted")
             confidence = data.get("confidence", 0)

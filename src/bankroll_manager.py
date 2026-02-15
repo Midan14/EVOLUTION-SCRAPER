@@ -99,7 +99,7 @@ class BankrollManager:
         Returns:
             Fraction of bankroll to bet (capped at 10%)
         """
-        if ev <= 0 or odds <= 1.0:
+        if ev <= 0 or odds < 1.0:
             return 0.0
 
         # Derive probability from EV and odds
@@ -152,7 +152,10 @@ class BankrollManager:
                 'ev_formatted': format_ev(ev),
                 'kelly_bet': 0.0,
                 'recommended_amount': 0.0,
-                'reason': f'EV negativo o insuficiente (EV={format_ev(ev)}, min={self.min_ev:.2%})'
+                'reason': (
+                    f'Negative or insufficient EV '
+                    f'(EV={format_ev(ev)}, min={self.min_ev:.2%})'
+                )
             }
 
         # Calculate effective odds
@@ -180,7 +183,7 @@ class BankrollManager:
             'kelly_bet': kelly_fraction,
             'kelly_pct': kelly_fraction * 100,
             'recommended_amount': recommended_amount,
-            'reason': f'EV positivo: {format_ev(ev)} | Kelly: {kelly_fraction:.1%}'
+            'reason': f'Positive EV: {format_ev(ev)} | Kelly: {kelly_fraction:.1%}'
         }
 
     def record_result(self, won: bool, amount: float) -> None:

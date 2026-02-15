@@ -849,11 +849,13 @@ class DragonBot:
                         # Get Lightning data and bankroll signals
                         lightning_stats = self.lightning_tracker.get_stats()
                         avg_multiplier = self.lightning_tracker.get_ev_multiplier()
-                        
+
                         # Calculate EV and get betting signal
+                        # Note: confidence is in percentage (0-100), convert to 0-1
+                        confidence_decimal = confidence / 100.0
                         signal_data = self.bankroll_manager.get_signal(
                             predicted,
-                            confidence / 100.0,  # Convert percentage to 0-1
+                            confidence_decimal,
                             avg_multiplier
                         )
                         
@@ -924,9 +926,14 @@ class DragonBot:
                 args = data.get('args', {})
                 multipliers = args.get('multipliers', {})
                 self.current_game_data['lightning_multipliers'] = multipliers
-                
+
                 # Record multipliers in Lightning tracker if available
-                if multipliers and self.current_game_data.get('game_id'):
+                if (
+                    multipliers
+                    and self.current_game_data.get('game_id')
+                    and 'player' in multipliers
+                    and 'banker' in multipliers
+                ):
                     try:
                         self.lightning_tracker.record_round(
                             self.current_game_data['game_id'],

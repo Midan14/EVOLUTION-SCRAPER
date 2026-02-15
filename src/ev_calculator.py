@@ -11,7 +11,9 @@ def calculate_player_ev(confidence: float, avg_multiplier: float, fee: float = 0
     Formula: EV = confidence * (1 + avg_multiplier) * (1 - fee) - (1 - confidence)
 
     Args:
-        confidence: Win probability (0.0 to 1.0)
+        confidence: Win probability as decimal (0.0 to 1.0).
+                   Should be a probability derived from model predictions.
+                   Example: 0.60 for 60% confidence
         avg_multiplier: Average Lightning multiplier
         fee: Lightning fee (default 0.50 = 50%)
 

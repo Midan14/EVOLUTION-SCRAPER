@@ -27,7 +27,7 @@ class LightningTracker:
             history_size = int(os.getenv("MULTIPLIER_HISTORY_SIZE", str(DEFAULT_HISTORY_SIZE)))
 
         self.history_size = history_size
-        self.multiplier_history: deque = deque(maxlen=self.history_size)
+        self.multiplier_history: deque[Dict[str, float]] = deque(maxlen=self.history_size)
         self.total_rounds = 0
 
         logger.info(f"✅ LightningTracker initialized with history_size={history_size}")
