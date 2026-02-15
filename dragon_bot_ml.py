@@ -15,6 +15,9 @@ from collections import deque
 from baccarat_strategies import BaccaratStrategies
 from telegram_notifier import TelegramNotifier
 from road_analyzer import RoadAnalyzer
+from src.lightning_tracker import LightningTracker
+from src.bankroll_manager import BankrollManager
+from src.config import config
 
 logging.basicConfig(
     level=logging.INFO,
@@ -572,6 +575,19 @@ class DragonBot:
         # Solo enviar señal a Telegram si confianza >= este umbral (default 50%)
         self.min_confidence_to_send = float(os.getenv("MIN_CONFIDENCE_TO_SEND", "50"))
         
+        # Lightning Baccarat tracker and bankroll manager
+        self.lightning_tracker = LightningTracker(
+            history_size=config.MULTIPLIER_HISTORY_SIZE
+        )
+        self.bankroll_manager = BankrollManager(
+            initial_bankroll=config.INITIAL_BANKROLL,
+            lightning_fee=config.LIGHTNING_FEE,
+            banker_commission=config.BANKER_COMMISSION,
+            kelly_fraction=config.KELLY_FRACTION,
+            min_ev=config.MIN_EV_TO_BET
+        )
+        logger.info("⚡ Lightning Tracker y Bankroll Manager inicializados")
+        
     async def initialize_ml(self):
         logger.info("🤖 Inicializando ML Predictor...")
         
@@ -830,26 +846,62 @@ class DragonBot:
                             'banker_pairs', 0
                         )
                         
-                        await self.telegram.send_comprehensive_prediction({
-                            'predicted': predicted,
-                            'confidence': confidence,
-                            'game_id': gid,
-                            'game_number': args.get('gameNumber'),
-                            'game_name': game_name,
-                            'timestamp': datetime.now().strftime('%H:%M:%S'),
-                            'strategies_data': {
-                                'consensus': consensus,
-                                'all_strategies': all_strategies
-                            },
-                            'deep_analysis': deep_analysis,
-                            'recent_stats': recent_stats,
-                            'pairs_data': {'player_pairs': player_pairs, 'banker_pairs': banker_pairs},
-                            'shoe_cards_out': self.current_game_data.get('shoe_cards_out', 0),
-                            'total_stats': global_stats,
-                            'big_road': viz_data.get('big_road', ''),
-                            'score_grid': viz_data.get('score_grid', ''),
-                            'last_results': viz_data.get('last_results', '')
-                        })
+                        # Get Lightning data and bankroll signals
+                        lightning_stats = self.lightning_tracker.get_stats()
+                        avg_multiplier = self.lightning_tracker.get_ev_multiplier()
+
+                        # Calculate EV and get betting signal
+                        # Note: confidence is in percentage (0-100), convert to 0-1
+                        confidence_decimal = confidence / 100.0
+                        signal_data = self.bankroll_manager.get_signal(
+                            predicted,
+                            confidence_decimal,
+                            avg_multiplier
+                        )
+                        
+                        session_stats = self.bankroll_manager.get_session_stats()
+                        
+                        # Check if Lightning mode is enabled (has multipliers)
+                        has_lightning = lightning_stats.get('total_rounds', 0) > 0
+                        
+                        if has_lightning:
+                            # Send Lightning prediction with EV and Kelly
+                            await self.telegram.send_lightning_prediction({
+                                'predicted': predicted,
+                                'confidence': confidence,
+                                'game_id': gid,
+                                'game_number': args.get('gameNumber'),
+                                'lightning_data': {
+                                    'avg_multiplier': avg_multiplier,
+                                    'distribution': self.lightning_tracker.format_distribution(),
+                                    'hot_table': lightning_stats.get('hot_streak', False)
+                                },
+                                'signal_data': signal_data,
+                                'session_stats': session_stats,
+                                'recent_stats': recent_stats
+                            })
+                        else:
+                            # Send regular comprehensive prediction (backward compatible)
+                            await self.telegram.send_comprehensive_prediction({
+                                'predicted': predicted,
+                                'confidence': confidence,
+                                'game_id': gid,
+                                'game_number': args.get('gameNumber'),
+                                'game_name': game_name,
+                                'timestamp': datetime.now().strftime('%H:%M:%S'),
+                                'strategies_data': {
+                                    'consensus': consensus,
+                                    'all_strategies': all_strategies
+                                },
+                                'deep_analysis': deep_analysis,
+                                'recent_stats': recent_stats,
+                                'pairs_data': {'player_pairs': player_pairs, 'banker_pairs': banker_pairs},
+                                'shoe_cards_out': self.current_game_data.get('shoe_cards_out', 0),
+                                'total_stats': global_stats,
+                                'big_road': viz_data.get('big_road', ''),
+                                'score_grid': viz_data.get('score_grid', ''),
+                                'last_results': viz_data.get('last_results', '')
+                            })
                     else:
                         logger.info(
                             f"ℹ️ Predicción {predicted} ({confidence:.1f}%) por debajo del umbral "
@@ -872,7 +924,24 @@ class DragonBot:
             
             elif msg_type == 'baccarat.potentialMultipliers':
                 args = data.get('args', {})
-                self.current_game_data['lightning_multipliers'] = args.get('multipliers', {})
+                multipliers = args.get('multipliers', {})
+                self.current_game_data['lightning_multipliers'] = multipliers
+
+                # Record multipliers in Lightning tracker if available
+                if (
+                    multipliers
+                    and self.current_game_data.get('game_id')
+                    and 'player' in multipliers
+                    and 'banker' in multipliers
+                ):
+                    try:
+                        self.lightning_tracker.record_round(
+                            self.current_game_data['game_id'],
+                            multipliers
+                        )
+                        logger.debug(f"⚡ Multipliers recorded: {multipliers}")
+                    except Exception as e:
+                        logger.error(f"Error recording multipliers: {e}")
             
             elif msg_type == 'baccarat.gameHistory':
                 args = data.get('args', {})

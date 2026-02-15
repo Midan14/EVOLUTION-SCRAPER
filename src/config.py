@@ -86,5 +86,13 @@ class Config:
         "**/api/result/**",
     ]
 
+    # Lightning Baccarat
+    LIGHTNING_FEE = float(os.getenv("LIGHTNING_FEE", "0.50"))
+    BANKER_COMMISSION = float(os.getenv("BANKER_COMMISSION", "0.05"))
+    INITIAL_BANKROLL = float(os.getenv("INITIAL_BANKROLL", "1000"))
+    KELLY_FRACTION = float(os.getenv("KELLY_FRACTION", "0.25"))
+    MIN_EV_TO_BET = float(os.getenv("MIN_EV_TO_BET", "0.02"))
+    MULTIPLIER_HISTORY_SIZE = int(os.getenv("MULTIPLIER_HISTORY_SIZE", "50"))
+
 
 config = Config()

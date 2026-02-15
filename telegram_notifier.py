@@ -1,5 +1,4 @@
 # telegram_notifier.py
-import asyncio
 import html
 import logging
 
@@ -295,6 +294,104 @@ Salió: {actual_emoji} <b>{safe_actual}</b>
         logger.info("ℹ️ Análisis de roads deshabilitado (formato eliminado)")
         return False
 
+    async def send_lightning_prediction(self, data):
+        """
+        Enviar predicción Lightning Baccarat con EV, señal, multiplicadores y Kelly
+
+        Args:
+            data: Dictionary containing:
+                - predicted (str): Predicted outcome ('Player', 'Banker', 'Tie')
+                - confidence (float): Confidence percentage (0-100)
+                - game_id (str): Game identifier
+                - lightning_data (dict): {'avg_multiplier', 'distribution', 'hot_table'}
+                - signal_data (dict): {'signal', 'ev_formatted', 'kelly_pct', 'recommended_amount', 'reason'}
+                - session_stats (dict): {'bankroll', 'session_pnl', 'wins', 'losses'}
+                - recent_stats (dict): {'player', 'banker', 'tie'}
+        """
+        try:
+            predicted = data.get("predicted")
+            confidence = data.get("confidence", 0)
+            game_id = data.get("game_id", "N/A")
+
+            # Lightning data
+            lightning_data = data.get("lightning_data", {})
+            avg_multiplier = lightning_data.get("avg_multiplier", 1.0)
+            distribution = lightning_data.get("distribution", "No data")
+            hot_table = lightning_data.get("hot_table", False)
+
+            # Bankroll & EV data
+            signal_data = data.get("signal_data", {})
+            signal = signal_data.get("signal", "SALTAR")
+            ev_formatted = signal_data.get("ev_formatted", "+0.00")
+            kelly_pct = signal_data.get("kelly_pct", 0.0)
+            recommended_amount = signal_data.get("recommended_amount", 0.0)
+            reason = signal_data.get("reason", "")
+
+            # Session stats
+            session_stats = data.get("session_stats", {})
+            bankroll = session_stats.get("bankroll", 0.0)
+            session_pnl = session_stats.get("session_pnl", 0.0)
+            wins = session_stats.get("wins", 0)
+            losses = session_stats.get("losses", 0)
+
+            # Recent stats
+            recent_stats = data.get("recent_stats", {})
+            player_count = recent_stats.get("player", 0)
+            banker_count = recent_stats.get("banker", 0)
+            tie_count = recent_stats.get("tie", 0)
+
+            if predicted == "Banker":
+                emoji = "🔴"
+            elif predicted == "Player":
+                emoji = "🔵"
+            else:
+                emoji = "🟢"
+
+            signal_emoji = "🟢" if signal == "APOSTAR" else "🔴"
+            hot_emoji = "🔥" if hot_table else "❄️"
+
+            safe_game_id = html.escape(str(game_id))
+            safe_predicted = html.escape(str(predicted).upper())
+
+            message = f"""⚡ <b>LIGHTNING BACCARAT PREDICCIÓN</b>
+            
+━━━━━━━━━━━━━━━━━━━━
+{emoji} <b>{safe_predicted}</b> {emoji}
+━━━━━━━━━━━━━━━━━━━━
+
+💪 Confianza: <b>{confidence:.1f}%</b>
+🆔 Mano: <code>{safe_game_id}</code>
+
+⚡ <b>LIGHTNING MULTIPLIERS</b>
+📊 Promedio: <b>{avg_multiplier:.2f}x</b>
+📈 Distribución: {html.escape(str(distribution))}
+{hot_emoji} Mesa: <b>{"CALIENTE" if hot_table else "NORMAL"}</b>
+
+💰 <b>SEÑAL DE APUESTA</b>
+{signal_emoji} <b>{signal}</b>
+📊 EV: <b>{ev_formatted}</b>
+🎯 Kelly: <b>{kelly_pct:.1f}%</b>
+💵 Cantidad: <b>${recommended_amount:.2f}</b>
+
+<i>{html.escape(reason)}</i>
+
+💼 <b>BANKROLL</b>
+💰 Actual: ${bankroll:.2f}
+📊 Sesión P&L: {'+' if session_pnl >= 0 else ''}{session_pnl:.2f}
+✅ Ganadas: {wins} | ❌ Perdidas: {losses}
+
+📊 Mesa: 🔵P:{player_count} 🔴B:{banker_count} 🟢T:{tie_count}"""
+
+            result = await self.send_message(message)
+            if result:
+                logger.info("✅ Predicción Lightning enviada a Telegram")
+            return result
+        except Exception as e:
+            logger.error(f"❌ Error en send_lightning_prediction: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return False
+
     async def send_comprehensive_prediction(self, data):
         """Enviar predicción comprehensiva con todas las estrategias"""
         try:
@@ -303,47 +400,47 @@ Salió: {actual_emoji} <b>{safe_actual}</b>
             game_id = data.get("game_id", "N/A")
             game_number = data.get("game_number", "N/A")
             game_name = data.get("game_name", "Baccarat")
-            
+
             strategies_data = data.get("strategies_data", {})
             deep_analysis = data.get("deep_analysis", {})
             consensus = strategies_data.get("consensus", {})
-            
+
             recent_stats = data.get("recent_stats", {})
             player_count = recent_stats.get("player", 0)
             banker_count = recent_stats.get("banker", 0)
             tie_count = recent_stats.get("tie", 0)
-            
+
             pairs_data = data.get("pairs_data", {})
             player_pairs = pairs_data.get("player_pairs", 0)
             banker_pairs = pairs_data.get("banker_pairs", 0)
-            
+
             shoe_cards_out = data.get("shoe_cards_out", 0)
             shoe_pct = (shoe_cards_out / 416 * 100) if shoe_cards_out else 0
-            
+
             big_road_data = data.get("big_road", [])
             score_grid_data = data.get("score_grid", [])
             last_results = data.get("last_results", "")
-            
+
             total_stats = data.get("total_stats", {})
             total_correct = total_stats.get("correct", 0)
             total_predictions = total_stats.get("total", 0)
             accuracy = (total_correct / total_predictions * 100) if total_predictions > 0 else 0
-            
+
             if predicted == "Banker":
                 emoji = "🔴"
             elif predicted == "Player":
                 emoji = "🔵"
             else:
                 emoji = "🟢"
-            
+
             conf_level = "⭐ EXCELENTE" if confidence >= 70 else "✅ BUENA" if confidence >= 60 else "⚠️ MODERADA" if confidence >= 50 else "❌ BAJA"
-            
+
             bars = int(confidence / 10)
             conf_bar = "🟩" * bars + "⬜" * (10 - bars)
-            
+
             strategies_votes = consensus.get("total_strategies", 0) if consensus else 0
             unanimous = consensus.get("unanimous", False) if consensus else False
-            
+
             msg = f"""🎯🧠 PREDICCIÓN - PATTERN MEMORY + GEMELOS + 4 ROADS
 
 📊 MESA #{game_number} {game_name}
@@ -372,90 +469,90 @@ Salió: {actual_emoji} <b>{safe_actual}</b>
 
 ESTRATEGIAS ACTIVAS:
 """
-            
+
             all_strategies = strategies_data.get("all_strategies", {})
-            
+
             # 1. Score-Combo (60-87% combos exactos de scores)
             score_combo = all_strategies.get("score_combo")
             if score_combo:
                 msg += f"  • 🎯 Score-Combo: ✅ {score_combo.get('trigger_name', '')} ({score_combo.get('confidence', 0):.0f}%)\n"
             else:
                 msg += "  • 🎯 Score-Combo: ❌ Sin match\n"
-            
+
             # 2. Memory-3 (67.6% accuracy real)
             mem3 = all_strategies.get("memory_3")
             if mem3:
                 msg += f"  • 🧠 Memory-3: ✅ '{mem3.get('pattern', '')}' → {mem3.get('predicted', '')} ({mem3.get('confidence', 0):.0f}%)\n"
             else:
                 msg += "  • 🧠 Memory-3: ❌ Sin patrón\n"
-            
+
             # 3. Sequence (55-76% secuencias de resultados)
             sequence = all_strategies.get("sequence")
             if sequence:
                 msg += f"  • 🔗 Sequence: ✅ {sequence.get('trigger_name', '')} ({sequence.get('confidence', 0):.0f}%)\n"
             else:
                 msg += "  • 🔗 Sequence: ❌ Sin secuencia\n"
-            
+
             # 4. Score-Color (55-62% validada con 1438 rondas)
             score_color = all_strategies.get("score_color")
             if score_color:
                 msg += f"  • 🎨 Score-Color: ✅ {score_color.get('trigger_name', '')} ({score_color.get('confidence', 0):.0f}%)\n"
             else:
                 msg += "  • 🎨 Score-Color: ❌ Sin trigger\n"
-            
+
             # 5. Memory-4 (58.8% accuracy real)
             mem4 = all_strategies.get("memory_4")
             if mem4:
                 msg += f"  • 🧠 Memory-4: ✅ '{mem4.get('pattern', '')}' → {mem4.get('predicted', '')} ({mem4.get('confidence', 0):.0f}%)\n"
             else:
                 msg += "  • 🧠 Memory-4: ❌ Sin patrón\n"
-            
+
             # 6. Score-Diff (54.1% accuracy real)
             score_diff = all_strategies.get("score_diff")
             if score_diff:
                 msg += f"  • 📐 Score-Diff: ✅ → {score_diff.get('predicted', '')} ({score_diff.get('confidence', 0):.0f}%)\n"
             else:
                 msg += "  • 📐 Score-Diff: ❌ Sin señal\n"
-            
-            msg += f"""
+
+            msg += """
 ━━━━━━━━━━━━━━━━━━━━
 👁️ ANÁLISIS PROFUNDO DE MESA
 
 
 """
-            
+
             if deep_analysis:
                 momentum = deep_analysis.get("momentum", {})
                 msg += f"➡️ Momento: {momentum.get('direction', 'NEUTRAL')}\n"
                 msg += f"📊 Volatilidad: {deep_analysis.get('volatility', 'N/A')}\n"
                 msg += f"🔄 Dominancia: {deep_analysis.get('dominance', 'N/A')}\n"
-            
-            msg += f"""
+
+            msg += """
 ━━━━━━━━━━━━━━━━━━━━
 📊 MÉTRICAS AVANZADAS
 
 """
-            
+
             if deep_analysis:
                 active_streak = deep_analysis.get("active_streak")
                 if active_streak:
                     msg += f"🔥 Racha activa: {active_streak}\n"
-                
+
                 tie_pct = deep_analysis.get("tie_pct", 0)
                 msg += f"🟢 Empates: {deep_analysis.get('tie_status', 'NORMAL')} ({tie_pct:.1f}% - {deep_analysis.get('tie_count', 0)}/{deep_analysis.get('player_count', 0) + deep_analysis.get('banker_count', 0)})\n"
-                
+
                 hot_numbers = deep_analysis.get("hot_numbers", [])
                 if hot_numbers:
                     hot_str = ", ".join([f"{n[0]} {n[1]*100/(deep_analysis.get('player_count', 1)+deep_analysis.get('banker_count', 1)):.0f}%" for n in hot_numbers])
                     msg += f"🔥 Números calientes: {hot_str}\n"
-                
+
                 changes = deep_analysis.get("changes", 0)
                 msg += f"🎢 Volatilidad: {deep_analysis.get('volatility', 'N/A')} ({changes} cambios en 20 rondas)\n"
-            
+
             msg += f"""
 🎴 Zapato: {shoe_cards_out}/416 ({shoe_pct:.0f}%)
 📊 Precisión Global: {accuracy:.1f}% ({total_correct}/{total_predictions})"""
-            
+
             result = await self.send_message(msg)
             return result
         except Exception as e:
