@@ -295,6 +295,92 @@ Salió: {actual_emoji} <b>{safe_actual}</b>
         logger.info("ℹ️ Análisis de roads deshabilitado (formato eliminado)")
         return False
 
+    async def send_lightning_prediction(self, data):
+        """Enviar predicción Lightning Baccarat con EV, señal, multiplicadores y Kelly"""
+        try:
+            predicted = data.get("predicted")
+            confidence = data.get("confidence", 0)
+            game_id = data.get("game_id", "N/A")
+            
+            # Lightning data
+            lightning_data = data.get("lightning_data", {})
+            avg_multiplier = lightning_data.get("avg_multiplier", 1.0)
+            distribution = lightning_data.get("distribution", "No data")
+            hot_table = lightning_data.get("hot_table", False)
+            
+            # Bankroll & EV data
+            signal_data = data.get("signal_data", {})
+            signal = signal_data.get("signal", "SALTAR")
+            ev_formatted = signal_data.get("ev_formatted", "+0.00")
+            kelly_pct = signal_data.get("kelly_pct", 0.0)
+            recommended_amount = signal_data.get("recommended_amount", 0.0)
+            reason = signal_data.get("reason", "")
+            
+            # Session stats
+            session_stats = data.get("session_stats", {})
+            bankroll = session_stats.get("bankroll", 0.0)
+            session_pnl = session_stats.get("session_pnl", 0.0)
+            wins = session_stats.get("wins", 0)
+            losses = session_stats.get("losses", 0)
+            
+            # Recent stats
+            recent_stats = data.get("recent_stats", {})
+            player_count = recent_stats.get("player", 0)
+            banker_count = recent_stats.get("banker", 0)
+            tie_count = recent_stats.get("tie", 0)
+            
+            if predicted == "Banker":
+                emoji = "🔴"
+            elif predicted == "Player":
+                emoji = "🔵"
+            else:
+                emoji = "🟢"
+            
+            signal_emoji = "🟢" if signal == "APOSTAR" else "🔴"
+            hot_emoji = "🔥" if hot_table else "❄️"
+            
+            safe_game_id = html.escape(str(game_id))
+            safe_predicted = html.escape(str(predicted).upper())
+            
+            message = f"""⚡ <b>LIGHTNING BACCARAT PREDICCIÓN</b>
+            
+━━━━━━━━━━━━━━━━━━━━
+{emoji} <b>{safe_predicted}</b> {emoji}
+━━━━━━━━━━━━━━━━━━━━
+
+💪 Confianza: <b>{confidence:.1f}%</b>
+🆔 Mano: <code>{safe_game_id}</code>
+
+⚡ <b>LIGHTNING MULTIPLIERS</b>
+📊 Promedio: <b>{avg_multiplier:.2f}x</b>
+📈 Distribución: {html.escape(str(distribution))}
+{hot_emoji} Mesa: <b>{"CALIENTE" if hot_table else "NORMAL"}</b>
+
+💰 <b>SEÑAL DE APUESTA</b>
+{signal_emoji} <b>{signal}</b>
+📊 EV: <b>{ev_formatted}</b>
+🎯 Kelly: <b>{kelly_pct:.1f}%</b>
+💵 Cantidad: <b>${recommended_amount:.2f}</b>
+
+<i>{html.escape(reason)}</i>
+
+💼 <b>BANKROLL</b>
+💰 Actual: ${bankroll:.2f}
+📊 Sesión P&L: {'+' if session_pnl >= 0 else ''}{session_pnl:.2f}
+✅ Ganadas: {wins} | ❌ Perdidas: {losses}
+
+📊 Mesa: 🔵P:{player_count} 🔴B:{banker_count} 🟢T:{tie_count}"""
+            
+            result = await self.send_message(message)
+            if result:
+                logger.info("✅ Predicción Lightning enviada a Telegram")
+            return result
+        except Exception as e:
+            logger.error(f"❌ Error en send_lightning_prediction: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return False
+
     async def send_comprehensive_prediction(self, data):
         """Enviar predicción comprehensiva con todas las estrategias"""
         try:
