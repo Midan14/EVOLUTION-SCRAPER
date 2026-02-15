@@ -859,7 +859,8 @@ class DragonBot:
                                 avg_multiplier
                             )
                             
-                            # Format strategies detail
+                            # Format strategies detail for Lightning message
+                            # (Simple format specific to Lightning predictions)
                             strategies_detail = ""
                             if consensus and consensus.get('strategies'):
                                 for s in consensus['strategies']:

@@ -564,7 +564,6 @@ ESTRATEGIAS ACTIVAS:
 💵 Apuesta Recomendada: <b>{kelly_pct:.1f}%</b> del bankroll
 💸 Monto: <b>${recommended_amount:.2f}</b>
 
-📋 Consenso: {strategies_detail}
 🛣️ BIG ROAD: 
 {road_display}
 

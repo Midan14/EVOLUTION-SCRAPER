@@ -50,7 +50,7 @@ def calculate_banker_ev(confidence: float, avg_multiplier: float, fee: float = 0
     return ev
 
 
-def min_confidence_for_positive_ev(prediction: str, avg_multiplier: float, fee: float = 0.50) -> float:
+def min_confidence_for_positive_ev(prediction: str, avg_multiplier: float, fee: float = 0.50, commission: float = 0.05) -> float:
     """
     Calculate minimum confidence needed for positive EV
     
@@ -58,6 +58,7 @@ def min_confidence_for_positive_ev(prediction: str, avg_multiplier: float, fee: 
         prediction: "Player" or "Banker"
         avg_multiplier: Average Lightning multiplier
         fee: Lightning fee (default 0.50 = 50%)
+        commission: Banker commission (default 0.05 = 5%)
     
     Returns:
         Minimum confidence (0.0 to 1.0) needed for positive EV
@@ -70,7 +71,7 @@ def min_confidence_for_positive_ev(prediction: str, avg_multiplier: float, fee: 
         min_conf = 1 / (1 + win_payout)
     elif prediction.lower() == "banker":
         # Same calculation but with commission
-        win_payout = (1 + avg_multiplier) * (1 - fee) * (1 - 0.05)
+        win_payout = (1 + avg_multiplier) * (1 - fee) * (1 - commission)
         min_conf = 1 / (1 + win_payout)
     else:
         # Tie - not recommended

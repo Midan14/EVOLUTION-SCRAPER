@@ -74,6 +74,11 @@ class BankrollManager:
         """
         Calculate Kelly criterion bet size
         
+        The Kelly criterion determines optimal bet sizing to maximize long-term growth.
+        A fractional Kelly approach is used for safety, and the bet is capped at 10%
+        of bankroll to prevent over-aggressive betting even when EV is very high.
+        This cap protects against model errors and variance.
+        
         Args:
             ev: Expected value per unit
             odds: Decimal odds (e.g., 2.0 for even money)
@@ -92,8 +97,9 @@ class BankrollManager:
         # Apply fractional Kelly for safety
         kelly_pct = kelly_pct * self.kelly_fraction
         
-        # Cap at 10% of bankroll for safety
-        return min(kelly_pct, 0.10)
+        # Cap at 10% of bankroll for safety - protects against model errors and variance
+        MAX_BET_FRACTION = 0.10
+        return min(kelly_pct, MAX_BET_FRACTION)
     
     def get_signal(
         self, 

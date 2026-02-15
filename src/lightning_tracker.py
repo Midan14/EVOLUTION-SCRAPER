@@ -123,6 +123,11 @@ class LightningTracker:
         """
         Check if table has high frequency of high multipliers (>=5x)
         
+        A table is considered "hot" when more than 25% of multipliers are 5x or higher.
+        This threshold (0.25) is based on the fact that in normal Lightning distribution,
+        high multipliers (5x, 8x) are relatively rare. A frequency above 25% indicates
+        an unusual concentration of high multipliers, suggesting favorable betting conditions.
+        
         Returns:
             True if hot table detected
         """
@@ -143,8 +148,9 @@ class LightningTracker:
             return False
         
         # Hot table if >25% of multipliers are 5x or higher
+        HOT_TABLE_THRESHOLD = 0.25
         high_mult_ratio = high_mult_count / total_mult_count
-        return high_mult_ratio > 0.25
+        return high_mult_ratio > HOT_TABLE_THRESHOLD
     
     def format_distribution(self) -> str:
         """
