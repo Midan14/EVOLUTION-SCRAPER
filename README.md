@@ -2,6 +2,14 @@
 
 Scraper para extraer resultados en tiempo real de mesas de Baccarat de Evolution Gaming.
 
+---
+
+## 🚀 ¿Primera vez? Lee la [Guía de Inicio Rápido](GUIA_INICIO_RAPIDO.md)
+
+**Si eres nuevo** y quieres saber cómo descargar, instalar y ejecutar el proyecto paso a paso, **[haz clic aquí para ver la Guía de Inicio Rápido](GUIA_INICIO_RAPIDO.md)** 📖
+
+---
+
 ## 🎯 Objetivo
 
 Extraer datos de la mesa **XXXtreme Lightning Baccarat** de Evolution Gaming desde:
